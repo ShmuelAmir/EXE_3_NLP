@@ -25,6 +25,7 @@ essays <- select(profiles, starts_with("essay"))
 essays <- apply(essays, MARGIN = 1, FUN = paste, collapse=" ")
 
 profiles_sex <- profiles$sex
+N <- length(profiles_sex)
 rm(profiles)
   
 html <- c( "<a[^>]+>", "class=[\"'][^\"']+[\"']", "&[a-z]+;", "\n", "\\n", "<br ?/>", "</[a-z]+ ?>" )
@@ -55,38 +56,40 @@ all.tokens <- tokens_select(all.tokens, "^[a-z]$", selection = "remove", valuety
 all.tokens.dfm <- dfm(all.tokens, tolower = FALSE)
 rm(essays, all.tokens)
 
-dfm.trimmed <- dfm_trim(all.tokens.dfm, min_docfreq = 10, min_termfreq = 20, verbose = TRUE)
+dfm.trimmed <- dfm_trim(all.tokens.dfm, min_docfreq = 0.025 * N, min_termfreq = 0.025 * N, verbose = TRUE)
 rm(all.tokens.dfm)
 gc()
 
 # ---------- TF - IDF ----------#
 
-# tf idf on sample data - 100 * 100
-n_max <- 100
-tokens.matrix <- convert(dfm.trimmed[1:n_max, 1:n_max], to = "matrix")
+tokens.matrix <- convert(dfm.trimmed, to = "matrix")
 
 tf <- prop.table(tokens.matrix, margin = 1)
-tf <- replace(tf, is.na(tf), 0)
-idf <- apply(tokens.matrix, MARGIN = 2, function(x) log10(n_max / sum(x != 0)))
+
+idf <- apply(tokens.matrix, MARGIN = 2, function(x) log10(dim(tokens.matrix)[1] / sum(x != 0)))
+
 tf.idf <- tf * idf
-
-quanteda.tf <- dfm_weight(dfm.trimmed[1:n_max, 1:n_max], "prop")
-quanteda.idf <- docfreq(dfm.trimmed[1:n_max, 1:n_max], "inverse")
-
-quanteda.df.idf <- quanteda.tf * quanteda.idf
-all.equal(tf.idf, convert(quanteda.df.idf, to = "matrix"))
+tf.idf <- na.omit(tf.idf)
 
 
-# quanteda implementation of tf idf (because mine not run on all data)
-all.tokens.tfidf <- dfm_weight(dfm.trimmed, "prop") * docfreq(dfm.trimmed, "inverse")
+# quanteda.tf <- dfm_weight(dfm.trimmed[1:n_max, 1:n_max], "prop")
+# quanteda.idf <- docfreq(dfm.trimmed[1:n_max, 1:n_max], "inverse")
+# 
+# quanteda.df.idf <- quanteda.tf * quanteda.idf
+# all.equal(tf.idf, convert(quanteda.df.idf, to = "matrix"))
+# 
+# 
+# # quanteda implementation of tf idf (because mine not run on all data)
+# all.tokens.tfidf <- dfm_weight(dfm.trimmed, "prop") * docfreq(dfm.trimmed, "inverse")
 
-rm(n_max, tokens.matrix, tf, idf, tf.idf, quanteda.tf, quanteda.idf, quanteda.df.idf, all.tokens.tfidf)
+rm(tokens.matrix, tf, idf)
 gc()
 
 # ---------- male vs female by text ----------#
 
 # df, names
-all.tokens.df <- convert(dfm.trimmed, to = "data.frame", row.names = NULL, optional = FALSE, make.names = TRUE)
+all.tokens.df <- as.data.frame(dfm.trimmed, row.names = NULL, optional = FALSE, make.names = TRUE)
+names(all.tokens.df) <- make.names(names(all.tokens.df), unique = TRUE) 
 
 rm(dfm.trimmed)
 gc()
