@@ -109,12 +109,9 @@ trainmodel <- train(sex ~ ., data = all.tokens.df, trControl = cross_validation,
 confusionMatrix(trainmodel) #rpart
 
 # ---------- Remove batch effect ----------#
-words_identified_by_gender <- list()
-for (word in names(trainmodel$finalModel$variable.importance)) {
-  words_identified_by_gender <- c(words_identified_by_gender, substring(word, 6)) # remove 'Data.'
-}
+most_importate_words <- substring(names(trainmodel$finalModel$variable.importance), 6) # maybe without removing 6
 
-all.tokens.dfm <- select(all.tokens.df, -words_identified_by_gender)
+tf.idf <- tf.idf[, !colnames(tf.idf) %in% most_importate_words]
 
 # ---------- Clustering ----------#
 #kmeans(tf.idf, k)
