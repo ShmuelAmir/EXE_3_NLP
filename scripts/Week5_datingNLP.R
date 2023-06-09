@@ -69,7 +69,7 @@ tf <- prop.table(tokens.matrix, margin = 1)
 idf <- apply(tokens.matrix, MARGIN = 2, function(x) log10(dim(tokens.matrix)[1] / sum(x != 0)))
 
 tf.idf <- tf * idf
-tf.idf <- na.omit(tf.idf)
+# tf.idf <- na.omit(tf.idf)
 
 
 # quanteda.tf <- dfm_weight(dfm.trimmed[1:n_max, 1:n_max], "prop")
@@ -88,21 +88,22 @@ gc()
 # ---------- male vs female by text ----------#
 
 # df, names
-all.tokens.df <- as.data.frame(dfm.trimmed, row.names = NULL, optional = FALSE, make.names = TRUE)
+all.tokens.df <- as.data.frame(tf.idf, row.names = NULL, optional = FALSE, make.names = TRUE)
+# all.tokens.df <- as.data.frame(dfm.trimmed, row.names = NULL, optional = FALSE, make.names = TRUE)
 names(all.tokens.df) <- make.names(names(all.tokens.df), unique = TRUE) 
-
+all.tokens.df <- na.omit(all.tokens.df)
 rm(dfm.trimmed)
 gc()
 
 # cross validation
-cross_validation <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+cross_validation <- trainControl(method = "repeatedcv", number = 10, repeats = 3, verboseIter = TRUE)
 
 # male, female labels
-all.tokens.df <- cbind(sex = profiles_sex, all.tokens.df)
+all.tokens.df <- cbind(sex = profiles_sex, data = all.tokens.df)
 rm(profiles_sex)
 
 # decision tree
-trainmodel <- train(all.tokens.df[,-1], all.tokens.df[,1], trControl = cross_validation, method = "rpart")
+trainmodel <- train(sex ~ ., data = all.tokens.df, trControl = cross_validation, method = "rpart")
 
 # confusion matrix
 confusionMatrix(trainmodel) #rpart
