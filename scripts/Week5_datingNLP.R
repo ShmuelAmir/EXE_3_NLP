@@ -112,19 +112,19 @@ confusionMatrix(trainmodel) #rpart
 most_importate_words <- substring(names(trainmodel$finalModel$variable.importance), 6) # maybe without removing 6
 
 tf.idf <- tf.idf[, !colnames(tf.idf) %in% most_importate_words]
+tf.idf <- na.omit(tf.idf)
 
 # ---------- Clustering ----------#
-#kmeans(tf.idf, k)
 
-# plot T-SNE / PCA
 # Calculate PCA
 pca <- prcomp(tf.idf)
-pca.data <- data.frame(Sample = rownames(pca$x), X = pca$x[,1], Y = pca$x[,2])
+pca.data_frame <- data.frame(Text = rownames(pca$x), x = pca$x[,1], y = pca$x[,2])
 pca.var <- pca$sdev ^ 2
 pca.var.per <- round(pca.var / sum(pca.var) * 100, 1)
 
 colors <- paste0("cluster #", 1:10)
 
+# plot T-SNE / PCA for each cluster result
 for (k in c(2, 3, 4, 10)) {
   
   clusters <- kmeans(tf.idf, k)
