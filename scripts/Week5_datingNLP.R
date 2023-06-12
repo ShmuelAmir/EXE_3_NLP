@@ -143,7 +143,7 @@ kmeans_plots <- function(k) {
     ggtitle(paste0("Kmeans: K = ", k, " clusters")) +
     xlab(paste0("PC1 (", pca.var.per[1], "%)")) + 
     ylab(paste0("PC2 (", pca.var.per[2], "%)")
-    )
+  )
 }
 
 kmeans_plots(2)
@@ -154,6 +154,7 @@ kmeans_plots(10)
 # plot T-SNE
 sign.pca <- pca.var.per[pca.var.per > 0.7]
 tsne.df <- data.frame(pc = seq(1:length(sign.pca)), val = sign.pca)
+
 ggplot(data = tsne.df, aes(pc, val)) + 
   geom_col()
 
