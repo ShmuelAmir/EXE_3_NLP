@@ -1,3 +1,8 @@
+# Shmuel Amir 316392323
+# team: WatsonTeam 
+# date: 11-08-2023
+# GitHub link: https://github.com/ShmuelAmir/Exe_3_NLP
+
 library(dplyr)
 library(stringr)
 library(quanteda)
@@ -6,10 +11,6 @@ library(caret)
 library(rpart)
 library(ggplot2)
 
-# library(mosaic)
-# library(xtable)
-# library(gridExtra)
-# library(stopwords)
 
 options(digits = 2)
 
